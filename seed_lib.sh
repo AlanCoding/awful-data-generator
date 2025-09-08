@@ -13,7 +13,7 @@ __SEED_LIB_SOURCED=1
 ############################################
 : "${BASE_URL:=http://localhost:44926}"
 : "${AUTH_USER:=admin}"
-: "${AUTH_PASS:=password1}"
+: "${AUTH_PASS:=r9hwurZIPH1U9FlUWl2SuZMOUnGuBIY6}"
 HEADERS=(-H "Content-Type: application/json" -H "Accept: application/json")
 
 ############################################
