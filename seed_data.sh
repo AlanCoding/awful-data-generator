@@ -19,7 +19,7 @@ declare -A USER_ID_BY_NAME=()   # associative: "userN" -> id
 for i in $(seq 0 9); do
   uname="user$i"
   email="user$i@example.com"
-  pw="password1"
+  pw="password"
 
   # Build JSON safely with jq (no fragile quoting)
   payload="$(jq -n --arg u "$uname" --arg e "$email" --arg pw "$pw" '{username:$u, email:$e, password:$pw}')"
@@ -103,4 +103,22 @@ for uname in "${!USER_ID_BY_NAME[@]}"; do
   POST_JSON "{\"user\": $uid, \"role_definition\": $INV_ADMIN_ID, \"object_id\": \"$INV_ID\"}" /api/gateway/v1/role_user_assignments/
   echo "gave $uname admin to inventory $INV_ID"
 done
+
+
+INV_VIEW_ID="$(POST_JSON '{"name":"inv viewer role","permissions":["awx.view_inventory"],"content_type":"awx.inventory"}' /api/gateway/v1/role_definitions/ 'name')"
+
+
+for uname in "${!USER_ID_BY_NAME[@]}"; do
+  uid="${USER_ID_BY_NAME[$uname]}"
+  [[ -n "$uid" && -n "${ORG1_ID:-}" ]] || continue
+  POST_JSON "{\"user\": $uid, \"role_definition\": $INV_VIEW_ID, \"object_id\": \"$INV_NO_ID\"}" /api/gateway/v1/role_user_assignments/
+  echo "gave $uname view to inventory $INV_ID"
+done
+
+VIEW_ALL_ID="$(POST_JSON '{"name":"view stuff","permissions":["eda.view_activation","eda.view_auditrule","awx.view_credential","eda.view_credentialinputsource","eda.view_decisionenvironment","eda.view_edacredential","eda.view_eventstream","awx.view_inventory","awx.view_jobtemplate","awx.view_notificationtemplate","shared.view_organization","awx.view_project","eda.view_project","eda.view_rulebook","eda.view_rulebookprocess","awx.view_workflowjobtemplate"],"content_type":"shared.organization"}' /api/gateway/v1/role_definitions/ 'name')"
+
+uid="${USER_ID_BY_NAME[user0]}"
+[[ -n "$uid" && -n "${ORG1_ID:-}" ]] || continue
+POST_JSON "{\"user\": $uid, \"role_definition\": $VIEW_ALL_ID, \"object_id\": \"$ORG1_ID\"}" /api/gateway/v1/role_user_assignments/
+echo "gave user0 view to stuff in org $ORG1_ID"
 
